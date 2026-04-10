@@ -8,6 +8,9 @@ from triage_env.models import Action, Observation, Reward
 from triage_env.tasks import TaskDefinition, get_task
 
 
+SCORE_EPSILON = 0.001
+
+
 class AIHospitalTriageEnv:
     """OpenEnv-style environment for hospital patient triage decisions."""
 
@@ -53,6 +56,14 @@ class AIHospitalTriageEnv:
         }
         return action in mapping[severity]
 
+    def _strict_score(self, score: float) -> float:
+        bounded = max(0.0, min(1.0, score))
+        if bounded <= 0.0:
+            return SCORE_EPSILON
+        if bounded >= 1.0:
+            return 1.0 - SCORE_EPSILON
+        return round(bounded, 3)
+
     def step(self, action: Action | str) -> Tuple[Observation, Reward, bool, Dict[str, object]]:
         if self.done:
             reward = Reward(
@@ -95,7 +106,7 @@ class AIHospitalTriageEnv:
             score -= 0.2
         if wrong_decision_penalty_applied:
             score -= 0.5
-        score = max(0.0, min(1.0, score))
+        score = self._strict_score(score)
 
         reason_parts = []
         if priority_correct:
