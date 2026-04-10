@@ -85,7 +85,7 @@ def _llm_action(client: OpenAI, model_name: str, observation: dict, step_index: 
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a hospital triage policy. Respond ONLY as compact JSON: {\"action\":\"...\"}.",
+                        "content": "Choose exactly one action from the allowed list. Respond ONLY as compact JSON: {\"action\":\"...\"}.",
                     },
                     {"role": "user", "content": json.dumps(prompt)},
                 ],
@@ -105,26 +105,6 @@ def _llm_action(client: OpenAI, model_name: str, observation: dict, step_index: 
             last_error = str(exc).replace("\n", " ")
 
     return _heuristic_action(observation, step_index), last_error or "model_request_failed"
-
-
-def _apply_policy_guard(task_name: str, observation: dict, action: ActionType, action_history: List[str]) -> Tuple[ActionType, str | None]:
-    severity = observation.get("injury_severity", "low")
-    heart_rate = int(observation.get("heart_rate", 80))
-    systolic = _parse_systolic(str(observation.get("blood_pressure", "120/80")))
-    critical = heart_rate >= 130 or heart_rate <= 40 or systolic < 90
-
-    if task_name == "task_hard" or (severity == "high" and critical):
-        if "assign_high_priority" not in action_history:
-            if action != "assign_high_priority":
-                return "assign_high_priority", "policy_guard_priority_first"
-        elif "send_to_emergency" not in action_history:
-            if action != "send_to_emergency":
-                return "send_to_emergency", "policy_guard_escalate_second"
-
-    if severity == "low" and action in {"assign_high_priority", "send_to_emergency"}:
-        return "assign_low_priority", "policy_guard_overtriage"
-
-    return action, None
 
 
 def _format_bool(value: bool) -> str:
@@ -154,8 +134,6 @@ def run_task(task_name: str, client: OpenAI, model_name: str) -> None:
         except Exception as exc:  # noqa: BLE001
             action = _heuristic_action(obs_dict, step_index)
             error_msg = str(exc).replace("\n", " ")
-
-        action, _policy_error = _apply_policy_guard(task_name, obs_dict, action, env.action_history)
 
         next_observation, reward, done, info = env.step(action)
         clamped_score = _clamp_score(reward.score)
