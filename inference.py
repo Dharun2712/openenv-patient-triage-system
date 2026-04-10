@@ -155,7 +155,7 @@ def run_task(task_name: str, client: OpenAI, model_name: str) -> None:
         next_observation, reward, done, info = env.step(action)
         rewards.append(reward.score)
 
-        success = bool(info.get("task_score", 0.0) >= 0.8) if done else False
+        success = bool(info.get("task_score", 0.01) >= 0.8) if done else False
 
         error_str = "null" if error_msg is None else error_msg
         print(
