@@ -1,0 +1,25 @@
+name: ai-hospital-patient-triage
+id: triage
+version: 1.0.0
+description: OpenEnv-compliant RL environment for AI hospital patient triage decisions.
+entrypoint: triage_env.environment:AIHospitalTriageEnv
+language: python
+license: MIT
+metadata:
+  domain: healthcare
+  rl_type: episodic
+  max_runtime_minutes: 20
+  resource_limits:
+    cpu: 2
+    memory_gb: 8
+observation_model: triage_env.models:Observation
+action_model: triage_env.models:Action
+reward_model: triage_env.models:Reward
+tasks:
+  - task_easy
+  - task_medium
+  - task_hard
+environment:
+  HF_TOKEN: ${HF_TOKEN}
+  MODEL_NAME: meta-llama/Llama-3.3-70B-Instruct
+  API_BASE_URL: https://router.huggingface.co/v1
