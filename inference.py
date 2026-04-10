@@ -22,6 +22,11 @@ ALLOWED_ACTIONS: List[ActionType] = [
 ]
 
 
+def _clamp_score(score: float) -> float:
+    """Clamp score to open interval (0, 1). Validator rejects 0.0 and 1.0."""
+    return max(0.01, min(0.99, score))
+
+
 def _parse_systolic(bp: str) -> int:
     try:
         return int(bp.split("/")[0])
@@ -153,13 +158,16 @@ def run_task(task_name: str, client: OpenAI, model_name: str) -> None:
         action, _policy_error = _apply_policy_guard(task_name, obs_dict, action, env.action_history)
 
         next_observation, reward, done, info = env.step(action)
-        rewards.append(reward.score)
+        clamped_score = _clamp_score(reward.score)
+        rewards.append(clamped_score)
 
-        success = bool(info.get("task_score", 0.01) >= 0.8) if done else False
+        raw_task_score = info.get("task_score", 0.01)
+        task_score = _clamp_score(raw_task_score)
+        success = bool(task_score >= 0.8) if done else False
 
         error_str = "null" if error_msg is None else error_msg
         print(
-            f"[STEP] step={step_index} action={action} reward={reward.score:.2f} "
+            f"[STEP] step={step_index} action={action} reward={clamped_score:.2f} "
             f"done={_format_bool(done)} error={error_str}"
         )
 
