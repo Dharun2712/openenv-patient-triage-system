@@ -1,3 +1,13 @@
+---
+title: OpenEnv Patient Triage System
+emoji: "🏥"
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # AI Hospital Patient Triage Environment
 
 OpenEnv-compliant reinforcement learning environment that simulates real-world hospital triage decisions.
