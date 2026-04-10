@@ -138,6 +138,7 @@ class AIHospitalTriageEnv:
             "expected_actions_current": []
             if self.done
             else self.task.expected_actions[self.progress_index],
+            "task_score": 0.01,
         }
 
         if self.done:

@@ -6,7 +6,8 @@ from typing import List
 def _efficiency_score(steps_taken: int, ideal_steps: int) -> float:
     if steps_taken <= 0:
         return 0.01
-    return min(1.0, ideal_steps / float(steps_taken))
+    efficiency = ideal_steps / float(steps_taken)
+    return max(0.01, min(0.99, float(efficiency)))
 
 
 def grade_task(task_name: str, action_history: List[str], max_steps: int) -> float:
