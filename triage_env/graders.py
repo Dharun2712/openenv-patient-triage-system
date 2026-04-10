@@ -3,14 +3,27 @@ from __future__ import annotations
 from typing import List
 
 
+EPSILON_SCORE = 0.001
+
+
 def _efficiency_score(steps_taken: int, ideal_steps: int) -> float:
     if steps_taken <= 0:
         return 0.0
     return min(1.0, ideal_steps / float(steps_taken))
 
 
+def _strict_unit_interval(score: float) -> float:
+    """Return a score strictly inside (0, 1) with stable 3-decimal formatting."""
+    rounded = round(score, 3)
+    if rounded <= 0.0:
+        return EPSILON_SCORE
+    if rounded >= 1.0:
+        return 1.0 - EPSILON_SCORE
+    return rounded
+
+
 def grade_task(task_name: str, action_history: List[str], max_steps: int) -> float:
-    """Deterministic score in [0.0, 1.0] based on correctness, steps, and efficiency."""
+    """Deterministic score strictly in (0.0, 1.0) based on correctness and efficiency."""
     steps_taken = min(len(action_history), max_steps)
 
     if task_name == "task_easy":
@@ -38,4 +51,5 @@ def grade_task(task_name: str, action_history: List[str], max_steps: int) -> flo
         raise ValueError(f"Unknown task name: {task_name}")
 
     score = (0.8 * correctness) + (0.2 * efficiency)
-    return round(max(0.0, min(1.0, score)), 3)
+    bounded = max(0.0, min(1.0, score))
+    return _strict_unit_interval(bounded)
