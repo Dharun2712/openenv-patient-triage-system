@@ -5,7 +5,7 @@ from typing import List
 
 def _efficiency_score(steps_taken: int, ideal_steps: int) -> float:
     if steps_taken <= 0:
-        return 0.0
+        return 0.01
     return min(1.0, ideal_steps / float(steps_taken))
 
 
