@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 
-EPSILON_SCORE = 0.001
+EPSILON_SCORE = 0.01
 
 
 def _efficiency_score(steps_taken: int, ideal_steps: int) -> float:
@@ -13,8 +13,8 @@ def _efficiency_score(steps_taken: int, ideal_steps: int) -> float:
 
 
 def _strict_unit_interval(score: float) -> float:
-    """Return a score strictly inside (0, 1) with stable 3-decimal formatting."""
-    rounded = round(score, 3)
+    """Return a score strictly inside (0, 1) and safe under 2-decimal logging."""
+    rounded = round(score, 2)
     if rounded <= 0.0:
         return EPSILON_SCORE
     if rounded >= 1.0:

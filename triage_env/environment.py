@@ -8,7 +8,7 @@ from triage_env.models import Action, Observation, Reward
 from triage_env.tasks import TaskDefinition, get_task
 
 
-SCORE_EPSILON = 0.001
+SCORE_EPSILON = 0.01
 
 
 class AIHospitalTriageEnv:
@@ -62,7 +62,7 @@ class AIHospitalTriageEnv:
             return SCORE_EPSILON
         if bounded >= 1.0:
             return 1.0 - SCORE_EPSILON
-        return round(bounded, 3)
+        return round(bounded, 2)
 
     def step(self, action: Action | str) -> Tuple[Observation, Reward, bool, Dict[str, object]]:
         if self.done:
